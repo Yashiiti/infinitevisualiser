@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Visualizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Your Data for Visualization</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" accept=".csv" />
+            <button type="submit">Upload and Visualize</button>
+        </form>
+        <div id="visualizations"></div>
+    </div>
+
+    <script>
+        $('#uploadForm').on('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData();
+            formData.append('file', $('#file')[0].files[0]);
+            
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    let vizDiv = $('#visualizations');
+                    vizDiv.html('');  // Clear any existing visualizations
+
+                    // Loop through and render visualizations
+                    response.visualizations.forEach(function(viz) {
+                        if (viz.startsWith('<html>')) {
+                            vizDiv.append(viz);  // Plotly HTML visualization
+                        } else {
+                            vizDiv.append('<img src="data:image/png;base64,' + viz + '" />');  // Base64 image
+                        }
+                    });
+                },
+                error: function(xhr) {
+                    alert('Failed to upload and visualize data.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
