@@ -14,9 +14,20 @@ app = Flask(__name__)
 # Function to generate visualizations
 def generate_visualizations(df):
     visualizations = []
+    mappings = {}  # To store mappings for categorical columns
     
-    # Convert any columns that can be converted to numeric
+    # Identify categorical columns
+    categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+    
+    # Convert categorical columns to numeric with mappings
+    for col in categorical_cols:
+        unique_values = df[col].unique()
+        mappings[col] = {val: idx for idx, val in enumerate(unique_values)}  # Create mapping
+        df[col] = df[col].map(mappings[col]).fillna(0).astype(int)  # Convert and fill NaN with 0
+    # # Convert any columns that can be converted to numeric
     df_numeric = df.apply(pd.to_numeric, errors='coerce')
+
+
 
     # 1. Correlation heatmap (only for numeric columns)
     if df_numeric.select_dtypes(include='number').shape[1] > 1:
