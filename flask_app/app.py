@@ -51,10 +51,19 @@ def generate_visualizations(df):
         plt.close()
 
     # 3. Scatter plot (if at least 2 numeric columns)
+    # 3. Scatter plot for pairs of numeric columns
     num_cols = df_numeric.select_dtypes(include='number').columns
     if len(num_cols) >= 2:
-        fig = px.scatter_matrix(df_numeric[num_cols].dropna())
-        visualizations.append(fig.to_html())
+        for i in range(len(num_cols)):
+            for j in range(i + 1, len(num_cols)):
+                fig = px.scatter(df_numeric, x=num_cols[i], y=num_cols[j],
+                                title=f'Scatter Plot: {num_cols[i]} vs {num_cols[j]}')
+                visualizations.append(fig.to_html())
+
+    num_cols = df_numeric.select_dtypes(include='number').columns
+    # if len(num_cols) >= 2:
+    #     fig = px.scatter_matrix(df_numeric[num_cols].dropna())
+    #     visualizations.append(fig.to_html())
 
     # 4. Distribution plots for numeric columns
     for col in num_cols:
